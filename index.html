@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>落差扑克牌占卜 · 一套非线性的解牌体系</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF6EF; --paper-2:#F4EDE0; --paper-3:#EFE6D6;
+  --ink:#2B2722; --ink-soft:#5b5246; --ink-faint:#8b8173;
+  --gold:#B8893A; --gold-2:#C9A227; --coral:#D97757; --red:#A3372B;
+  --line:#d8ccb6;
+  --serif:'Noto Serif SC','Spectral',serif;
+  --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+#concept{scroll-margin-top:80px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.8;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E")}
+.wrap{position:relative;z-index:1}
+a{color:var(--gold);text-decoration:none}a:hover{color:var(--coral)}
+
+header.nav{position:sticky;top:0;z-index:40;background:rgba(250,246,239,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-family:var(--sans)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.02em;color:var(--ink);font-size:16px}
+.brand .mark{font-family:var(--serif);font-size:21px;color:var(--red);line-height:1;letter-spacing:-2px}
+.brand .mark .k{color:var(--ink)}
+.nav-links{margin-left:auto;display:flex;gap:26px;font-size:14.5px;font-weight:500}
+.nav-links a{color:var(--ink-soft)}.nav-links a:hover{color:var(--coral)}
+
+/* ===== hero ===== */
+.hero{max-width:var(--maxw);margin:0 auto;padding:64px 28px 30px;display:grid;grid-template-columns:1.15fr .85fr;gap:50px;align-items:center}
+.hero .eyebrow{font-family:var(--sans);font-size:13px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.hero .eyebrow .suits{letter-spacing:3px;font-size:15px}
+.hero .eyebrow .suits .r{color:var(--red)}.hero .eyebrow .suits .k{color:var(--ink)}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:72px;line-height:1.04;margin:0 0 22px;letter-spacing:.01em}
+.hero h1 .em{color:var(--red)}
+.hero .lede{font-size:21px;color:var(--ink-soft);max-width:26em;margin:0 0 16px;line-height:1.72}
+.hero .lede .dc{float:left;font-family:var(--serif);font-weight:900;color:var(--gold);font-size:76px;line-height:.72;padding:8px 14px 0 0}
+.hero .sub{font-size:17px;color:var(--ink-faint);max-width:30em;margin:0 0 32px}
+.hero .cta{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--sans)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-size:15px;font-weight:700;padding:13px 24px;border-radius:32px;transition:all .22s;cursor:pointer;border:1.5px solid transparent;white-space:nowrap}
+.btn.primary{background:var(--coral);color:#fff}
+.btn.primary:hover{background:var(--red);color:#fff;transform:translateY(-2px)}
+.btn.ghost{border-color:var(--line);color:var(--ink-soft);background:var(--paper-2)}
+.btn.ghost:hover{border-color:var(--coral);color:var(--ink)}
+.scrollcue{display:inline-flex;align-items:center;gap:10px;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--ink-soft);letter-spacing:.02em;padding:4px 2px;border-bottom:1.5px solid transparent;transition:color .2s,border-color .2s}
+.scrollcue:hover{color:var(--coral);border-color:var(--coral)}
+.scrollcue .arr{display:inline-flex;font-size:17px;color:var(--gold);animation:cuebob 1.8s ease-in-out infinite}
+.scrollcue:hover .arr{color:var(--coral)}
+@keyframes cuebob{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media (prefers-reduced-motion:reduce){.scrollcue .arr{animation:none}}
+
+/* fanned cards */
+.fan{position:relative;height:420px;display:flex;align-items:center;justify-content:center}
+.fan .fc{position:absolute;width:188px;border-radius:11px;background:#fff;box-shadow:0 18px 40px -18px rgba(43,39,34,.55),0 4px 10px -4px rgba(43,39,34,.3);transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-origin:bottom center;border:1px solid rgba(184,137,58,.25)}
+.fan .fc img{width:100%;display:block;border-radius:11px;aspect-ratio:238/333}
+.fan .fc:nth-child(1){transform:rotate(-16deg) translate(-118px,16px)}
+.fan .fc:nth-child(2){transform:rotate(-7deg) translate(-58px,-6px)}
+.fan .fc:nth-child(3){transform:rotate(1deg) translate(0,-14px);z-index:3}
+.fan .fc:nth-child(4){transform:rotate(9deg) translate(60px,-4px)}
+.fan .fc:nth-child(5){transform:rotate(17deg) translate(120px,18px)}
+.fan:hover .fc:nth-child(1){transform:rotate(-22deg) translate(-150px,10px)}
+.fan:hover .fc:nth-child(2){transform:rotate(-10deg) translate(-74px,-12px)}
+.fan:hover .fc:nth-child(3){transform:rotate(1deg) translate(0,-24px)}
+.fan:hover .fc:nth-child(4){transform:rotate(12deg) translate(76px,-10px)}
+.fan:hover .fc:nth-child(5){transform:rotate(23deg) translate(152px,12px)}
+
+.divider{max-width:var(--maxw);margin:26px auto 0;padding:0 28px;display:flex;align-items:center;gap:18px;color:var(--gold)}
+.divider svg{flex:1;height:12px;opacity:.78}.divider .flor{font-size:16px;letter-spacing:.3em}
+
+/* ===== concept band ===== */
+.concept{max-width:980px;margin:54px auto 0;padding:0 28px;text-align:center}
+.concept .ic{font-family:var(--sans);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px}
+.concept .big{font-family:var(--serif);font-size:30px;line-height:1.5;color:var(--ink);margin:0 auto;max-width:20em}
+.concept .big .u{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='10'%3E%3Cpath d='M2 6 Q 30 2 60 5 T 118 4' stroke='%23D97757' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:0 100%;background-size:100% 9px;padding-bottom:4px}
+.concept .em{color:var(--red);font-weight:700}
+
+/* ===== portal cards ===== */
+.portal{max-width:var(--maxw);margin:56px auto 0;padding:0 28px}
+.sec-h{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 22px;display:flex;align-items:center;gap:11px}
+.sec-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.pcard{display:flex;gap:22px;align-items:flex-start;border:1px solid var(--line);border-radius:16px;background:var(--paper-2);padding:26px 28px;transition:border-color .22s,transform .22s,box-shadow .22s;position:relative;overflow:hidden}
+.pcard:hover{border-color:var(--coral);transform:translateY(-3px);box-shadow:0 18px 34px -20px rgba(43,39,34,.45)}
+.pcard .pico{flex:none;width:64px;height:64px;border-radius:13px;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--red);position:relative}
+.pcard .pico.gold{color:var(--gold)}.pcard .pico.ink{color:var(--ink)}
+.pcard .pico::after{content:"";position:absolute;inset:5px;border-radius:9px;border:1px solid var(--gold);opacity:.2;filter:url(#rough)}
+.pcard .pbody h3{font-family:var(--serif);font-weight:700;font-size:22px;margin:2px 0 6px;color:var(--ink);display:flex;align-items:center;gap:9px}
+.pcard .pbody .num{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:1px 9px;letter-spacing:.05em;white-space:nowrap}
+.pcard .pbody p{margin:0;font-size:15.5px;color:var(--ink-soft);line-height:1.62}
+.pcard .pbody .go{display:inline-block;margin-top:12px;font-family:var(--sans);font-size:13.5px;font-weight:700;color:var(--coral)}
+.pcard.wide{grid-column:1 / -1}
+
+/* ===== suit strip ===== */
+.suitstrip{max-width:var(--maxw);margin:46px auto 0;padding:0 28px}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.scard{border:1px solid var(--line);border-radius:14px;background:var(--paper-2);padding:22px;text-align:center;transition:all .22s}
+.scard:hover{border-color:var(--coral);transform:translateY(-3px);box-shadow:0 14px 28px -18px rgba(43,39,34,.4)}
+.scard .sg{font-size:42px;line-height:1;filter:url(#rough)}
+.scard .sg.r{color:var(--red)}.scard .sg.k{color:var(--ink)}
+.scard h4{font-family:var(--serif);font-weight:700;font-size:20px;margin:10px 0 2px;color:var(--ink)}
+.scard .yy{font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);letter-spacing:.04em}
+
+footer{border-top:1px solid var(--line);margin-top:70px;font-family:var(--sans);font-size:13px;color:var(--ink-faint)}
+.foot-inner{max-width:var(--maxw);margin:0 auto;padding:30px 28px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner a{color:var(--ink-faint)}.foot-inner a:hover{color:var(--coral)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:20px;padding:40px 28px 20px}
+  .fan{order:-1;height:300px;transform:scale(.82)}
+  .hero h1{font-size:52px}
+  .pgrid{grid-template-columns:1fr}
+  .sgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:760px){
+  body{font-size:17px}
+  .nav-links{display:none}
+  .hero{padding:30px 18px 14px}
+  .hero h1{font-size:42px}
+  .hero .lede{font-size:19px}
+  .concept .big{font-size:24px}
+  .portal,.suitstrip,.divider{padding-left:18px;padding-right:18px}
+  .nav-inner{padding:12px 18px}
+  .pcard{padding:22px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="3" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+
+<div class="wrap">
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="mark"><span>♥</span><span class="k">♠</span></span><span>落差扑克牌占卜</span></div>
+    <nav class="nav-links">
+      <a href="教程页.html">教程</a>
+      <a href="牌库索引页.html">牌库</a>
+      <a href="花色页.html">四花色</a>
+      <a href="组合浏览器.html">组合浏览器</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="eyebrow">非线性解牌体系 <span class="suits"><span class="r">♥</span><span class="k">♠</span><span class="r">♦</span><span class="k">♣</span></span></div>
+    <h1>每张牌,<br>都<span class="em">同时</span>藏着<br>它的反面</h1>
+    <p class="lede"><span class="dc">落</span>差占卜不问吉凶,而问"此刻偏向哪一面"。一张牌由花色与数字两重含义叠合,而每一重,都同时成立着自己与自己的相反。</p>
+    <p class="sub">优势即劣势,劣势即优势——随语境翻转。这是一套把"叠加态"当作读牌方法的体系。</p>
+    <a class="scrollcue" href="#concept">先从核心理念读起 <span class="arr">↓</span></a>
+  </div>
+  <div class="fan">
+    <div class="fc"><img src="cards_svg/spades_A.svg" alt="黑桃A"></div>
+    <div class="fc"><img src="cards_svg/diamonds_7.svg" alt="方块7"></div>
+    <div class="fc"><img src="cards_svg/hearts_3.svg" alt="红桃三"></div>
+    <div class="fc"><img src="cards_svg/clubs_10.svg" alt="梅花10"></div>
+    <div class="fc"><img src="cards_svg/joker_red.svg" alt="大王"></div>
+  </div>
+</section>
+
+<div class="divider">
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  <span class="flor">❦</span>
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+</div>
+
+<section class="concept" id="concept">
+  <div class="ic">核心理念 · 叠加态</div>
+  <p class="big">不问"这是好牌还是坏牌",<br>只问"在此刻的语境里,它<span class="u">偏向哪一面</span>"。<br><span class="em">优势即劣势,二者同时成立。</span></p>
+</section>
+
+<section class="portal">
+  <h2 class="sec-h">从这里开始</h2>
+  <div class="pgrid">
+    <a class="pcard" href="教程页.html">
+      <div class="pico gold">❦</div>
+      <div class="pbody"><h3>教程读本 <span class="num">5 章</span></h3><p>从核心理念到亲手解一张牌——非线性、叠加态、四花色、组合与解牌方法,书式单栏,循序渐进。</p><span class="go">开始阅读 →</span></div>
+    </a>
+    <a class="pcard" href="牌库索引页.html">
+      <div class="pico">♥</div>
+      <div class="pbody"><h3>牌库索引 <span class="num">54 张</span></h3><p>四花色 × 十三层落差,外加大小王。按花色与层级筛选,或搜索牌名与要义。</p><span class="go">翻阅牌库 →</span></div>
+    </a>
+    <a class="pcard" href="花色页.html">
+      <div class="pico ink">♠</div>
+      <div class="pbody"><h3>四花色 <span class="num">心之动 / 客观存在</span></h3><p>红桃、黑桃、方块、梅花的性格与阴阳定位,可切换对照,理解"颜色不等于阴阳"。</p><span class="go">查看花色 →</span></div>
+    </a>
+    <a class="pcard" href="组合浏览器.html">
+      <div class="pico gold">♦</div>
+      <div class="pbody"><h3>组合浏览器 <span class="num">精选</span></h3><p>花色相遇的嵌套、依存、转化。点开 4×4 配对矩阵任意一格,读组合的显义与隐义。</p><span class="go">浏览组合 →</span></div>
+    </a>
+    <a class="pcard wide" href="单卡页模板.html?c=hearts_3">
+      <div class="pico">♥3</div>
+      <div class="pbody"><h3>完整样卡 · 红桃三 <span class="num">单卡页</span></h3><p>一张牌的完整读法:花色面 × 数字面,以及标志性的"正义 / 反义"叠加态开关——同一份特质,在显义与隐义间翻面。</p><span class="go">翻开红桃三 →</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="suitstrip">
+  <h2 class="sec-h">四花色一览</h2>
+  <div class="sgrid">
+    <a class="scard" href="花色页.html"><div class="sg r">♥</div><h4>红桃</h4><div class="yy">阳 · 心之动</div></a>
+    <a class="scard" href="花色页.html"><div class="sg k">♠</div><h4>黑桃</h4><div class="yy">阴 · 心之动</div></a>
+    <a class="scard" href="花色页.html"><div class="sg r">♦</div><h4>方块</h4><div class="yy">阴 · 客观存在</div></a>
+    <a class="scard" href="花色页.html"><div class="sg k">♣</div><h4>梅花</h4><div class="yy">阳 · 客观存在</div></a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <span>落差扑克牌占卜 · 一套非线性、叠加态的解牌体系</span>
+    <span><a href="教程页.html">教程</a> · <a href="牌库索引页.html">牌库索引</a> · <a href="花色页.html">四花色</a> · <a href="组合浏览器.html">组合浏览器</a></span>
+  </div>
+</footer>
+</div>
+</body>
+</html>

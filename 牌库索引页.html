@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>牌库 · 落差扑克牌占卜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF6EF; --paper-2:#F4EDE0; --paper-3:#EFE6D6;
+  --ink:#2B2722; --ink-soft:#5b5246; --ink-faint:#8b8173;
+  --gold:#B8893A; --gold-2:#C9A227; --coral:#D97757; --red:#A3372B;
+  --line:#d8ccb6;
+  --serif:'Noto Serif SC','Spectral',serif;
+  --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
+  --maxw:1240px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--serif);font-size:18px;line-height:1.78;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+.wrap{position:relative;z-index:1}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--coral)}
+
+/* nav */
+header.nav{position:sticky;top:0;z-index:40;background:rgba(250,246,239,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-family:var(--sans)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.02em;color:var(--ink);font-size:16px}
+.brand .mark{font-family:var(--serif);font-size:21px;color:var(--red);line-height:1;letter-spacing:-2px}
+.brand .mark .k{color:var(--ink)}
+.nav-links{margin-left:auto;display:flex;gap:26px;font-size:14.5px;font-weight:500}
+.nav-links a{color:var(--ink-soft)}
+.nav-links a.active{color:var(--red)}
+.nav-links a:hover{color:var(--coral)}
+
+/* page header */
+.crumb{max-width:var(--maxw);margin:0 auto;padding:20px 28px 0;font-family:var(--sans);font-size:13.5px;color:var(--ink-faint);display:flex;gap:9px;align-items:center}
+.crumb .sep{color:var(--line)}
+.crumb a{color:var(--ink-faint)}
+.crumb .here{color:var(--red);font-weight:500}
+.phead{max-width:var(--maxw);margin:0 auto;padding:14px 28px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap}
+.phead h1{font-family:var(--serif);font-weight:900;font-size:52px;margin:0;letter-spacing:.01em;display:flex;align-items:baseline;gap:16px}
+.phead h1 .suits{font-size:34px;letter-spacing:2px}
+.phead h1 .suits .r{color:var(--red)}
+.phead h1 .suits .k{color:var(--ink)}
+.phead .intro{font-size:18px;color:var(--ink-soft);max-width:34em;margin:14px 0 0;line-height:1.7}
+.phead .count{font-family:var(--sans);font-size:13px;color:var(--ink-faint);letter-spacing:.04em;text-align:right;flex:none}
+.phead .count b{font-family:var(--serif);font-size:40px;font-weight:900;color:var(--gold);display:block;line-height:1}
+
+/* sketch divider */
+.divider{max-width:var(--maxw);margin:22px auto 0;padding:0 28px;display:flex;align-items:center;gap:18px;color:var(--gold)}
+.divider svg{flex:1;height:12px;opacity:.75}
+.divider .flor{font-size:15px;letter-spacing:.3em}
+
+/* sticky filter bar */
+.filters{position:sticky;top:57px;z-index:30;background:rgba(250,246,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-top:18px}
+.filters-inner{max-width:var(--maxw);margin:0 auto;padding:13px 28px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;font-family:var(--sans)}
+.fgroup{display:flex;align-items:center;gap:9px}
+.fgroup .flabel{font-size:12px;color:var(--ink-faint);letter-spacing:.1em;font-weight:700;text-transform:uppercase;margin-right:2px}
+.chip{
+  font-family:var(--sans);font-size:14px;font-weight:500;color:var(--ink-soft);
+  border:1px solid var(--line);background:var(--paper-2);border-radius:30px;
+  padding:6px 15px;cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:all .2s;white-space:nowrap;line-height:1.2;
+}
+.chip:hover{border-color:var(--coral);color:var(--ink)}
+.chip.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.chip .s.r{color:var(--red)}
+.chip .s.k{color:var(--ink)}
+.chip.on .s.r,.chip.on .s.k{color:#fff}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:30px;background:var(--paper);padding:7px 15px;min-width:280px}
+.search input{border:none;background:none;outline:none;font-family:var(--sans);font-size:14px;color:var(--ink);width:100%}
+.search input::placeholder{color:var(--ink-faint)}
+.search .ic{color:var(--gold);font-size:14px}
+
+/* main */
+main{max-width:var(--maxw);margin:0 auto;padding:18px 28px 100px}
+
+/* suit section */
+.suitsec{margin-top:40px}
+.suitsec.hide{display:none}
+.suithead{display:flex;align-items:center;gap:20px;margin-bottom:22px;padding-bottom:14px;border-bottom:1.5px solid var(--line);position:relative}
+.suithead .big{font-size:52px;line-height:1;filter:url(#rough)}
+.suithead .big.r{color:var(--red)}
+.suithead .big.k{color:var(--ink)}
+.suithead .t h2{font-family:var(--serif);font-weight:900;font-size:30px;margin:0;display:flex;align-items:baseline;gap:12px}
+.suithead .t h2 .yy{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-faint);letter-spacing:.08em}
+.suithead .t .desc{font-family:var(--sans);font-size:14px;color:var(--ink-soft);margin-top:2px}
+.suithead .n{margin-left:auto;font-family:var(--sans);font-size:13px;color:var(--ink-faint)}
+
+/* card grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:20px}
+.ccell{
+  display:flex;flex-direction:column;gap:0;cursor:pointer;
+  text-align:center;transition:transform .25s;
+}
+.ccell.hide{display:none}
+.ccell .cimg{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:11px;
+  padding:11px;transition:all .25s;position:relative;
+}
+.ccell .cimg img{width:100%;display:block;border-radius:5px;aspect-ratio:238/333;
+  box-shadow:0 4px 12px -6px rgba(43,39,34,.45);transition:box-shadow .25s}
+.ccell:hover{transform:translateY(-5px)}
+.ccell:hover .cimg{border-color:var(--coral);box-shadow:0 14px 28px -16px rgba(43,39,34,.5)}
+.ccell:hover .cimg img{box-shadow:0 8px 18px -6px rgba(43,39,34,.5)}
+.ccell .cap{padding:11px 4px 2px}
+.ccell .cname{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--ink);display:flex;align-items:baseline;justify-content:center;gap:6px}
+.ccell .cname .sy{font-size:14px}
+.ccell .cname .sy.r{color:var(--red)}
+.ccell .cname .sy.k{color:var(--ink)}
+.ccell .ess{font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);margin-top:3px;letter-spacing:.02em}
+.ccell.special .ess{color:var(--coral)}
+
+/* empty state */
+.empty{display:none;text-align:center;padding:80px 20px;color:var(--ink-faint);font-family:var(--sans)}
+.empty.show{display:block}
+.empty .e-glyph{font-size:46px;color:var(--line);margin-bottom:14px}
+.empty .e-t{font-family:var(--serif);font-size:22px;color:var(--ink-soft);margin-bottom:6px}
+
+/* footer */
+footer{border-top:1px solid var(--line);margin-top:70px;font-family:var(--sans);font-size:13px;color:var(--ink-faint)}
+.foot-inner{max-width:var(--maxw);margin:0 auto;padding:30px 28px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner a{color:var(--ink-faint)}
+.foot-inner a:hover{color:var(--coral)}
+
+@media (max-width:760px){
+  body{font-size:17px}
+  .nav-links{display:none}
+  .phead h1{font-size:38px}
+  .phead h1 .suits{font-size:24px}
+  .phead .count b{font-size:30px}
+  .filters{top:53px}
+  .filters-inner{padding:11px 18px;gap:14px}
+  .search{margin-left:0;width:100%;min-width:0;order:5}
+  main{padding:14px 18px 70px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:13px}
+  .suithead .big{font-size:38px}
+  .suithead .t h2{font-size:23px}
+  .ccell .cname{font-size:15px}
+  .crumb{padding:16px 18px 0}
+  .phead{padding:12px 18px 6px}
+  .divider{padding:0 18px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+
+<div class="wrap">
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="mark"><span>♥</span><span class="k">♠</span></span><span>落差扑克牌占卜</span></div>
+    <nav class="nav-links">
+      <a href="教程页.html">教程</a>
+      <a href="#" class="active">牌库</a>
+      <a href="花色页.html">四花色</a>
+      <a href="组合浏览器.html">组合浏览器</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="crumb"><a href="index.html">首页</a><span class="sep">›</span><span class="here">牌库</span></nav>
+
+<div class="phead">
+  <div>
+    <h1>牌库 <span class="suits"><span class="r">♥</span><span class="k">♠</span><span class="r">♦</span><span class="k">♣</span></span></h1>
+    <p class="intro">五十四张牌,四花色 × 十三层落差,外加混沌与有序的大小王。每张都能代表自身的反面——点开任意一张,读它的显义与隐义。</p>
+  </div>
+  <div class="count"><b id="resultN">54</b>张 · 当前显示</div>
+</div>
+
+<div class="divider">
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  <span class="flor">❦</span>
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filters">
+  <div class="filters-inner">
+    <div class="fgroup" id="suitFilter">
+      <span class="flabel">花色</span>
+      <button class="chip on" data-suit="all">全部</button>
+      <button class="chip" data-suit="hearts"><span class="s r">♥</span>红桃</button>
+      <button class="chip" data-suit="spades"><span class="s k">♠</span>黑桃</button>
+      <button class="chip" data-suit="diamonds"><span class="s r">♦</span>方块</button>
+      <button class="chip" data-suit="clubs"><span class="s k">♣</span>梅花</button>
+      <button class="chip" data-suit="joker"><span class="s r">★</span>大小王</button>
+    </div>
+    <div class="fgroup" id="typeFilter">
+      <span class="flabel">层级</span>
+      <button class="chip on" data-type="all">全部</button>
+      <button class="chip" data-type="number">数字 A–10</button>
+      <button class="chip" data-type="court">人物 JQK</button>
+      <button class="chip" data-type="special">特殊牌</button>
+    </div>
+    <div class="search">
+      <span class="ic">⌕</span>
+      <input id="searchBox" type="text" placeholder="搜索牌名 / 要义，如「勇敢」">
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="board"></div>
+  <div class="empty" id="empty">
+    <div class="e-glyph">❦</div>
+    <div class="e-t">这一格暂时是空的</div>
+    <div>没有匹配的牌。换个关键词,或重置筛选试试。</div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <span>落差扑克牌占卜 · 牌库索引 · 54 张</span>
+    <span><a href="教程页.html">教程</a> · <a href="单卡页模板.html?c=hearts_3">单卡页样张</a> · <a href="花色页.html">四花色</a> · <a href="组合浏览器.html">组合浏览器</a></span>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var SUITS = [
+    {key:'hearts',  cn:'红桃', sym:'♥', cls:'r', yy:'阳 · 心之动',   desc:'积极、爱心、勇敢、生命力——心之所向的动。'},
+    {key:'spades',  cn:'黑桃', sym:'♠', cls:'k', yy:'阴 · 心之动',   desc:'承载、沉淀、厚重、潜能——也可是破坏与抽离。'},
+    {key:'diamonds',cn:'方块', sym:'♦', cls:'r', yy:'阴 · 客观存在', desc:'未显化的概率场、规则与边界,可塑性强。'},
+    {key:'clubs',   cn:'梅花', sym:'♣', cls:'k', yy:'阳 · 客观存在', desc:'已坍缩 / 显化,具象成果、有形的行动与产品。'}
+  ];
+  var RANKS = [
+    {r:'A', cn:'A', ess:'起始单点'},
+    {r:'2', cn:'二', ess:'互动'},
+    {r:'3', cn:'三', ess:'基础人类'},
+    {r:'4', cn:'四', ess:'经历思考'},
+    {r:'5', cn:'五', ess:'佼佼者'},
+    {r:'6', cn:'六', ess:'博学渊博'},
+    {r:'7', cn:'七', ess:'通达落差'},
+    {r:'8', cn:'八', ess:'变牌 · 规则'},
+    {r:'9', cn:'九', ess:'不可描述'},
+    {r:'10',cn:'十', ess:'圆满极致'},
+    {r:'J', cn:'J', ess:'官位 · 意志'},
+    {r:'Q', cn:'Q', ess:'女王 · 阴极'},
+    {r:'K', cn:'K', ess:'国王 · 阳极'}
+  ];
+  // type buckets
+  function typeOf(r){
+    if(r==='J'||r==='Q'||r==='K') return ['court'];
+    return ['number'];
+  }
+  function isSpecial(r){ return (r==='8'||r==='10'); } // 8变牌、10圆满 列入特殊
+  var JOKERS = [
+    {file:'joker_red',  cn:'大王', sym:'★', cls:'r', ess:'混沌 · 有序'},
+    {file:'joker_black',cn:'小王', sym:'★', cls:'k', ess:'初始 · 一体'}
+  ];
+
+  var board = document.getElementById('board');
+  var allCells = [];
+
+  SUITS.forEach(function(s){
+    var sec = document.createElement('section');
+    sec.className = 'suitsec';
+    sec.setAttribute('data-suit', s.key);
+    sec.innerHTML =
+      '<div class="suithead">'+
+        '<span class="big '+s.cls+'">'+s.sym+'</span>'+
+        '<div class="t"><h2>'+s.cn+'<span class="yy">'+s.yy+'</span></h2>'+
+        '<div class="desc">'+s.desc+'</div></div>'+
+        '<span class="n">13 张</span>'+
+      '</div>';
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+    RANKS.forEach(function(rk){
+      var name = s.cn + rk.cn;
+      var types = typeOf(rk.r).slice();
+      if(isSpecial(rk.r)) types.push('special');
+      var cell = document.createElement('a');
+      cell.className = 'ccell';
+      cell.setAttribute('href','单卡页模板.html?c='+s.key+'_'+rk.r);
+      cell.setAttribute('data-suit', s.key);
+      cell.setAttribute('data-types', types.join(' '));
+      cell.setAttribute('data-search', (name+' '+rk.ess+' '+s.cn+' '+s.yy+' '+s.desc).toLowerCase());
+      cell.innerHTML =
+        '<div class="cimg"><img loading="lazy" src="cards_svg/'+s.key+'_'+rk.r+'.svg" alt="'+name+'"></div>'+
+        '<div class="cap"><div class="cname">'+name+'<span class="sy '+s.cls+'">'+s.sym+rk.r+'</span></div>'+
+        '<div class="ess">'+rk.ess+'</div></div>';
+      grid.appendChild(cell);
+      allCells.push(cell);
+    });
+    sec.appendChild(grid);
+    board.appendChild(sec);
+  });
+
+  // joker section
+  var jsec = document.createElement('section');
+  jsec.className = 'suitsec';
+  jsec.setAttribute('data-suit','joker');
+  jsec.innerHTML =
+    '<div class="suithead">'+
+      '<span class="big r">★</span>'+
+      '<div class="t"><h2>大小王<span class="yy">混沌 与 有序</span></h2>'+
+      '<div class="desc">初始阴阳一体,既是创始起点,又是圆融归零——灵活多变,不分开看。</div></div>'+
+      '<span class="n">2 张</span>'+
+    '</div>';
+  var jgrid = document.createElement('div');
+  jgrid.className = 'grid';
+  JOKERS.forEach(function(j){
+    var cell = document.createElement('a');
+    cell.className = 'ccell special';
+    cell.setAttribute('href','单卡页模板.html?c='+j.file);
+    cell.setAttribute('data-suit','joker');
+    cell.setAttribute('data-types','special');
+    cell.setAttribute('data-search',(j.cn+' '+j.ess+' 大小王 混沌 有序 王').toLowerCase());
+    cell.innerHTML =
+      '<div class="cimg"><img loading="lazy" src="cards_svg/'+j.file+'.svg" alt="'+j.cn+'"></div>'+
+      '<div class="cap"><div class="cname">'+j.cn+'<span class="sy '+j.cls+'">★</span></div>'+
+      '<div class="ess">'+j.ess+'</div></div>';
+    jgrid.appendChild(cell);
+    allCells.push(cell);
+  });
+  jsec.appendChild(jgrid);
+  board.appendChild(jsec);
+
+  // ---- filtering ----
+  var state = {suit:'all', type:'all', q:''};
+  var resultN = document.getElementById('resultN');
+  var empty = document.getElementById('empty');
+
+  function bindChips(id, key){
+    var g = document.getElementById(id);
+    g.addEventListener('click', function(e){
+      var b = e.target.closest('.chip'); if(!b) return;
+      g.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on')});
+      b.classList.add('on');
+      state[key] = b.getAttribute(key==='suit'?'data-suit':'data-type');
+      apply();
+    });
+  }
+  bindChips('suitFilter','suit');
+  bindChips('typeFilter','type');
+  document.getElementById('searchBox').addEventListener('input', function(e){
+    state.q = e.target.value.trim().toLowerCase(); apply();
+  });
+
+  function apply(){
+    var n = 0;
+    allCells.forEach(function(c){
+      var okSuit = state.suit==='all' || c.getAttribute('data-suit')===state.suit;
+      var types = c.getAttribute('data-types');
+      var okType = state.type==='all' || types.indexOf(state.type)>-1;
+      var okQ = !state.q || c.getAttribute('data-search').indexOf(state.q)>-1;
+      var show = okSuit && okType && okQ;
+      c.classList.toggle('hide', !show);
+      if(show) n++;
+    });
+    // hide empty sections
+    document.querySelectorAll('.suitsec').forEach(function(sec){
+      var any = sec.querySelectorAll('.ccell:not(.hide)').length>0;
+      sec.classList.toggle('hide', !any);
+    });
+    resultN.textContent = n;
+    empty.classList.toggle('show', n===0);
+  }
+  apply();
+})();
+</script>
+</body>
+</html>

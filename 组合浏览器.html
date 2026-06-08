@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>组合浏览器 · 落差扑克牌占卜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF6EF; --paper-2:#F4EDE0; --paper-3:#EFE6D6;
+  --ink:#2B2722; --ink-soft:#5b5246; --ink-faint:#8b8173;
+  --gold:#B8893A; --gold-2:#C9A227; --coral:#D97757; --red:#A3372B;
+  --line:#d8ccb6;
+  --serif:'Noto Serif SC','Spectral',serif;
+  --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.8;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E")}
+.wrap{position:relative;z-index:1}
+a{color:var(--gold);text-decoration:none}a:hover{color:var(--coral)}
+
+header.nav{position:sticky;top:0;z-index:40;background:rgba(250,246,239,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-family:var(--sans)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.02em;color:var(--ink);font-size:16px}
+.brand .mark{font-family:var(--serif);font-size:21px;color:var(--red);line-height:1;letter-spacing:-2px}
+.brand .mark .k{color:var(--ink)}
+.nav-links{margin-left:auto;display:flex;gap:26px;font-size:14.5px;font-weight:500}
+.nav-links a{color:var(--ink-soft)}.nav-links a.active{color:var(--red)}.nav-links a:hover{color:var(--coral)}
+
+.crumb{max-width:var(--maxw);margin:0 auto;padding:20px 28px 0;font-family:var(--sans);font-size:13.5px;color:var(--ink-faint);display:flex;gap:9px;align-items:center}
+.crumb .sep{color:var(--line)}.crumb a{color:var(--ink-faint)}.crumb .here{color:var(--red);font-weight:500}
+
+.tophero{max-width:var(--maxw);margin:0 auto;padding:18px 28px 6px}
+.tophero .kick{font-family:var(--sans);font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:12px}
+.tophero h1{font-family:var(--serif);font-weight:900;font-size:56px;line-height:1.04;margin:0 0 12px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.tophero h1 .syms{font-size:34px;letter-spacing:2px}
+.tophero h1 .syms .r{color:var(--red)}.tophero h1 .syms .k{color:var(--ink)}
+.tophero .sub{font-size:19px;color:var(--ink-soft);max-width:32em;margin:0;line-height:1.7}
+
+.divider{max-width:var(--maxw);margin:30px auto 0;padding:0 28px;display:flex;align-items:center;gap:18px;color:var(--gold)}
+.divider svg{flex:1;height:12px;opacity:.78}.divider .flor{font-size:16px;letter-spacing:.3em}
+
+main{max-width:var(--maxw);margin:0 auto;padding:0 28px 100px}
+.sec-h{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:42px 0 8px;display:flex;align-items:center;gap:11px}
+.sec-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.sec-note{font-family:var(--sans);font-size:14px;color:var(--ink-faint);margin:0 0 22px;max-width:44em}
+
+/* ===== pairing matrix ===== */
+.matrixwrap{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:38px;align-items:start}
+.matrix{font-family:var(--sans)}
+.mgrid{display:grid;grid-template-columns:46px repeat(4,1fr);grid-template-rows:46px repeat(4,1fr);gap:6px}
+.mhead{display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1}
+.mhead.r{color:var(--red)}.mhead.k{color:var(--ink)}
+.mcorner{display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:11px;letter-spacing:.06em;text-align:center;font-weight:700}
+.mcell{aspect-ratio:1;border:1px solid var(--line);border-radius:9px;background:var(--paper-2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s;gap:2px}
+.mcell .ps{font-size:17px;line-height:1}.mcell .ps.r{color:var(--red)}.mcell .ps.k{color:var(--ink)}
+.mcell.diag{background:repeating-linear-gradient(45deg,var(--paper-3),var(--paper-3) 5px,var(--paper-2) 5px,var(--paper-2) 10px);cursor:default}
+.mcell.diag .ps{opacity:.4}
+.mcell.curated{background:#fff;border-color:var(--gold)}
+.mcell.curated::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--coral)}
+.mcell:not(.diag):hover{border-color:var(--coral);transform:translateY(-2px)}
+.mcell.sel{box-shadow:inset 0 0 0 2px var(--coral);border-color:var(--coral)}
+.mlegend{display:flex;gap:18px;margin-top:16px;font-size:12.5px;color:var(--ink-faint);flex-wrap:wrap}
+.mlegend span{display:flex;align-items:center;gap:6px}
+.mlegend .dot{width:8px;height:8px;border-radius:50%;background:var(--coral)}
+.mlegend .sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--gold);background:#fff}
+.mlegend .sw.diag{background:repeating-linear-gradient(45deg,var(--paper-3),var(--paper-3) 3px,var(--paper-2) 3px,var(--paper-2) 6px);border-color:var(--line)}
+
+/* detail panel */
+.detail{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:30px 32px;position:relative;min-height:300px}
+.detail::after{content:"";position:absolute;inset:8px;border-radius:11px;pointer-events:none;border:1.5px solid var(--gold);opacity:.16;filter:url(#rough)}
+.detail .dkeys{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.detail .dkeys .s{font-size:38px;line-height:1}.detail .dkeys .s.r{color:var(--red)}.detail .dkeys .s.k{color:var(--ink)}
+.detail .dkeys .plus{color:var(--gold);font-size:22px}
+.detail h3{font-family:var(--serif);font-weight:900;font-size:30px;margin:6px 0 2px}
+.detail .dyy{font-family:var(--sans);font-size:13px;color:var(--ink-faint);letter-spacing:.05em;margin-bottom:18px}
+.detail .drow{margin-bottom:15px}
+.detail .drl{font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;display:inline-block}
+.detail .drow.pos .drl{color:var(--coral)}
+.detail .drow.neg .drl{color:var(--ink-faint)}
+.detail .drow p{margin:0;font-size:16.5px;line-height:1.7;color:var(--ink-soft)}
+.detail .drow.pos p{color:var(--ink)}
+.detail.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint)}
+.detail.empty-state .eg{font-size:40px;color:var(--line);margin-bottom:12px}
+.detail.empty-state .et{font-family:var(--serif);font-size:21px;color:var(--ink-soft);margin-bottom:8px}
+.detail.empty-state .ed{font-family:var(--sans);font-size:14px;max-width:24em;line-height:1.6}
+.detail.empty-state .dkeys{justify-content:center;margin-bottom:14px}
+
+/* ===== gallery ===== */
+.filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-family:var(--sans);margin-bottom:22px}
+.filters .flabel{font-size:12px;color:var(--ink-faint);letter-spacing:.1em;font-weight:700;text-transform:uppercase;margin-right:4px}
+.chip{font-size:14px;font-weight:500;color:var(--ink-soft);border:1px solid var(--line);background:var(--paper-2);border-radius:30px;padding:6px 15px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap}
+.chip:hover{border-color:var(--coral);color:var(--ink)}
+.chip.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.chip .s.r{color:var(--red)}.chip .s.k{color:var(--ink)}.chip.on .s.r,.chip.on .s.k{color:#fff}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+.gcard{border:1px solid var(--line);border-radius:14px;background:var(--paper-2);padding:24px 26px;position:relative;transition:border-color .22s,transform .22s,box-shadow .22s}
+.gcard:hover{border-color:var(--coral);transform:translateY(-3px);box-shadow:0 16px 30px -18px rgba(43,39,34,.45)}
+.gcard.hide{display:none}
+.gcard .gkeys{display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.gcard .gkeys .s{font-size:27px;line-height:1}.gcard .gkeys .s.r{color:var(--red)}.gcard .gkeys .s.k{color:var(--ink)}
+.gcard .gkeys .plus{color:var(--gold);font-size:16px}
+.gcard .gkeys .name{font-family:var(--serif);font-weight:700;font-size:19px;margin-left:7px;color:var(--ink)}
+.gcard .grow{margin-bottom:11px}
+.gcard .grl{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;display:inline-block}
+.gcard .grow.pos .grl{color:var(--coral)}.gcard .grow.neg .grl{color:var(--ink-faint)}
+.gcard .grow p{margin:0;font-size:15.5px;line-height:1.64;color:var(--ink-soft)}
+.gcard .grow.pos p{color:var(--ink)}
+.gcard.warn{background:#f8ece9;border-color:#d9a59c}
+.gcard.warn .gkeys .name{color:var(--red)}
+.gcard .gtag{position:absolute;top:18px;right:20px;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:2px 10px;opacity:.7}
+.gcard.warn .gtag{color:var(--red);border-color:#d9a59c}
+
+footer{border-top:1px solid var(--line);margin-top:70px;font-family:var(--sans);font-size:13px;color:var(--ink-faint)}
+.foot-inner{max-width:var(--maxw);margin:0 auto;padding:30px 28px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner a{color:var(--ink-faint)}.foot-inner a:hover{color:var(--coral)}
+
+@media (max-width:900px){
+  .matrixwrap{grid-template-columns:1fr;gap:26px}
+  .matrix{max-width:420px;margin:0 auto;width:100%}
+}
+@media (max-width:760px){
+  body{font-size:17px}
+  .nav-links{display:none}
+  .tophero h1{font-size:38px}.tophero h1 .syms{font-size:24px}
+  .gallery{grid-template-columns:1fr}
+  main{padding:0 18px 70px}.crumb,.tophero,.divider{padding-left:18px;padding-right:18px}.nav-inner{padding:12px 18px}
+  .detail{padding:24px 22px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+
+<div class="wrap">
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="mark"><span>♥</span><span class="k">♠</span></span><span>落差扑克牌占卜</span></div>
+    <nav class="nav-links">
+      <a href="教程页.html">教程</a>
+      <a href="牌库索引页.html">牌库</a>
+      <a href="花色页.html">四花色</a>
+      <a href="#" class="active">组合浏览器</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="crumb"><a href="index.html">首页</a><span class="sep">›</span><span class="here">组合浏览器</span></nav>
+
+<div class="tophero">
+  <div class="kick">花色相遇 · 嵌套 / 依存 / 转化</div>
+  <h1>组合浏览器 <span class="syms"><span class="r">♥</span><span class="k">♠</span><span class="r">♦</span><span class="k">♣</span></span></h1>
+  <p class="sub">花色从不孤立。两色、三色同现,会嵌套、依存、转化出新的状态。体系里组合无穷,这里只收精选——点开配对矩阵任意一格,或在下方画廊里翻阅。</p>
+</div>
+
+<div class="divider">
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  <span class="flor">❦</span>
+  <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+</div>
+
+<main>
+  <h2 class="sec-h">花色配对矩阵</h2>
+  <p class="sec-note">行 × 列 = 两种花色相遇。点亮珊瑚点的格子已收录精选释义;斜线格是同色相叠(见四花色页);其余配对体系中存在,但本站尚未收录。</p>
+  <div class="matrixwrap">
+    <div class="matrix">
+      <div class="mgrid" id="mgrid"></div>
+      <div class="mlegend">
+        <span><span class="dot"></span>已收录精选</span>
+        <span><span class="sw"></span>可点击</span>
+        <span><span class="sw diag"></span>同色相叠</span>
+      </div>
+    </div>
+    <div class="detail" id="detail"></div>
+  </div>
+
+  <h2 class="sec-h">精选组合 · 画廊</h2>
+  <p class="sec-note">收录的组合一览。用花色筛选,只看包含某一花色的组合。</p>
+  <div class="filters" id="filters">
+    <span class="flabel">含花色</span>
+    <button class="chip on" data-f="all">全部</button>
+    <button class="chip" data-f="hearts"><span class="s r">♥</span>红桃</button>
+    <button class="chip" data-f="spades"><span class="s k">♠</span>黑桃</button>
+    <button class="chip" data-f="diamonds"><span class="s r">♦</span>方块</button>
+    <button class="chip" data-f="clubs"><span class="s k">♣</span>梅花</button>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <span>落差扑克牌占卜 · 组合浏览器 · 精选</span>
+    <span><a href="教程页.html">教程</a> · <a href="牌库索引页.html">牌库索引</a> · <a href="花色页.html">四花色</a></span>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var SUITS=['hearts','spades','diamonds','clubs'];
+  var SYM={hearts:'♥',spades:'♠',diamonds:'♦',clubs:'♣'};
+  var CLS={hearts:'r',spades:'k',diamonds:'r',clubs:'k'};
+  var CN={hearts:'红桃',spades:'黑桃',diamonds:'方块',clubs:'梅花'};
+
+  function key(a,b){return [a,b].sort().join('|');}
+  // curated pairs
+  var PAIRS={};
+  function add(a,b,name,yy,pos,neg){PAIRS[key(a,b)]={a:a,b:b,name:name,yy:yy,pos:pos,neg:neg};}
+  add('hearts','clubs','红桃 + 梅花','心之动 × 客观存在 · 阳阳相生',
+    '积极行动、勇于创造,不断进取拓展;一种生机勃勃、无尽生发的状态,生命力充沛。',
+    '另一面,亦可是停不下来的扩张——不断生发却无处收束,耗散在无尽的进取里。');
+  add('spades','clubs','黑桃 + 梅花','心之动 × 客观存在 · 阴阳相摩',
+    '摧毁性质的状态:汲取、抽离、分割、破坏——把已显化之物拆解、收回。',
+    '反过来看,正是极致的承载与包容、深度挖掘——向下扎得最深的那一面。');
+  add('hearts','spades','红桃 + 黑桃','心之动 × 心之动 · 偏向的两极',
+    '偏向的极致:可正可负,甚至 360 度任意偏向,并可随意极化到不同程度。',
+    '极化本身即风险——偏到尽头,便再难回到中道,任何一端都可能反噬。');
+
+  // gallery list (curated + the absence pattern)
+  var GALLERY=[
+    {suits:['hearts','clubs'],pair:key('hearts','clubs')},
+    {suits:['spades','clubs'],pair:key('spades','clubs')},
+    {suits:['hearts','spades'],pair:key('hearts','spades')},
+    {special:'warn',suits:['hearts','spades','clubs'],name:'缺方块(只有 ♥♠♣)',
+     yy:'缺一色 · 失去边界',
+     pos:'当方块缺席,世界失去规则与边界——这是一种罕见而极端的状态标记。',
+     neg:'整个世界乱套、无规则、卡死态——没有边界、大小、范围,所有东西混乱地堆叠卡在一起。'}
+  ];
+
+  // ----- build matrix -----
+  var mgrid=document.getElementById('mgrid');
+  // corner
+  var corner=document.createElement('div');corner.className='mcorner';corner.textContent='行 + 列';mgrid.appendChild(corner);
+  // column heads
+  SUITS.forEach(function(c){var h=document.createElement('div');h.className='mhead '+CLS[c];h.textContent=SYM[c];mgrid.appendChild(h);});
+  SUITS.forEach(function(r){
+    var rh=document.createElement('div');rh.className='mhead '+CLS[r];rh.textContent=SYM[r];mgrid.appendChild(rh);
+    SUITS.forEach(function(c){
+      var cell=document.createElement('div');
+      cell.className='mcell';
+      if(r===c){
+        cell.classList.add('diag');
+        cell.innerHTML='<span class="ps '+CLS[r]+'">'+SYM[r]+'</span>';
+        cell.title=CN[r]+' · 同色相叠';
+        cell.addEventListener('click',function(){location.href='花色页.html';});
+      }else{
+        var k=key(r,c);
+        var curated=!!PAIRS[k];
+        if(curated)cell.classList.add('curated');
+        cell.innerHTML='<span class="ps '+CLS[r]+'">'+SYM[r]+'</span><span class="ps '+CLS[c]+'">'+SYM[c]+'</span>';
+        cell.setAttribute('data-pair',k);
+        cell.title=CN[r]+' + '+CN[c];
+        cell.addEventListener('click',function(){selectPair(k,r,c);cell.scrollIntoView?null:null;});
+      }
+      mgrid.appendChild(cell);
+    });
+  });
+
+  var detail=document.getElementById('detail');
+  function selectPair(k,a,b){
+    document.querySelectorAll('.mcell').forEach(function(c){c.classList.toggle('sel',c.getAttribute('data-pair')===k);});
+    var p=PAIRS[k];
+    if(p){
+      detail.className='detail';
+      detail.innerHTML=
+        '<div class="dkeys"><span class="s '+CLS[p.a]+'">'+SYM[p.a]+'</span><span class="plus">+</span><span class="s '+CLS[p.b]+'">'+SYM[p.b]+'</span></div>'+
+        '<h3>'+p.name+'</h3><div class="dyy">'+p.yy+'</div>'+
+        '<div class="drow pos"><span class="drl">显义 · 一面</span><p>'+p.pos+'</p></div>'+
+        '<div class="drow neg"><span class="drl">隐义 · 反面</span><p>'+p.neg+'</p></div>';
+    }else{
+      detail.className='detail empty-state';
+      detail.innerHTML=
+        '<div class="dkeys"><span class="s '+CLS[a]+'">'+SYM[a]+'</span><span class="plus">+</span><span class="s '+CLS[b]+'">'+SYM[b]+'</span></div>'+
+        '<div class="eg">❦</div><div class="et">'+CN[a]+' + '+CN[b]+' · 尚未收录</div>'+
+        '<div class="ed">这一配对在体系中确实存在,但本站只收精选。可先分别读两种花色的性格,按语境自行叠合。</div>';
+    }
+  }
+
+  // ----- gallery -----
+  var gallery=document.getElementById('gallery');
+  GALLERY.forEach(function(g){
+    var el=document.createElement('div');
+    var p=g.pair?PAIRS[g.pair]:null;
+    var warn=g.special==='warn';
+    el.className='gcard'+(warn?' warn':'');
+    el.setAttribute('data-suits',g.suits.join(' '));
+    var keys;
+    if(warn){
+      keys='<span class="s r">♥</span><span class="s k">♠</span><span class="s k">♣</span><span class="name">'+g.name+'</span>';
+    }else{
+      keys='<span class="s '+CLS[p.a]+'">'+SYM[p.a]+'</span><span class="plus">+</span><span class="s '+CLS[p.b]+'">'+SYM[p.b]+'</span><span class="name">'+p.name+'</span>';
+    }
+    var name=warn?g.name:p.name, yy=warn?g.yy:p.yy, pos=warn?g.pos:p.pos, neg=warn?g.neg:p.neg;
+    el.innerHTML=
+      '<span class="gtag">'+(warn?'特例':'精选')+'</span>'+
+      '<div class="gkeys">'+keys+'</div>'+
+      '<div class="grow pos"><span class="grl">显义 · 一面</span><p>'+pos+'</p></div>'+
+      '<div class="grow neg"><span class="grl">隐义 · 反面</span><p>'+neg+'</p></div>';
+    gallery.appendChild(el);
+  });
+
+  // filters
+  var fstate='all';
+  document.getElementById('filters').addEventListener('click',function(e){
+    var b=e.target.closest('.chip');if(!b)return;
+    this.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+    b.classList.add('on');fstate=b.getAttribute('data-f');
+    document.querySelectorAll('.gcard').forEach(function(c){
+      var has=fstate==='all'||c.getAttribute('data-suits').indexOf(fstate)>-1;
+      c.classList.toggle('hide',!has);
+    });
+  });
+
+  // default selection
+  selectPair(key('hearts','clubs'),'hearts','clubs');
+})();
+</script>
+</body>
+</html>

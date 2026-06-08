@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# 设计工具中间产物
+.thumbnail
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 日志
+*.log

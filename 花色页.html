@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四花色 · 落差扑克牌占卜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF6EF; --paper-2:#F4EDE0; --paper-3:#EFE6D6;
+  --ink:#2B2722; --ink-soft:#5b5246; --ink-faint:#8b8173;
+  --gold:#B8893A; --gold-2:#C9A227; --coral:#D97757; --red:#A3372B;
+  --line:#d8ccb6;
+  --serif:'Noto Serif SC','Spectral',serif;
+  --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
+  --maxw:1200px;
+  --accent:var(--red);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.8;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E")}
+.wrap{position:relative;z-index:1}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--coral)}
+
+header.nav{position:sticky;top:0;z-index:40;background:rgba(250,246,239,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-family:var(--sans)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:14px 28px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.02em;color:var(--ink);font-size:16px}
+.brand .mark{font-family:var(--serif);font-size:21px;color:var(--red);line-height:1;letter-spacing:-2px}
+.brand .mark .k{color:var(--ink)}
+.nav-links{margin-left:auto;display:flex;gap:26px;font-size:14.5px;font-weight:500}
+.nav-links a{color:var(--ink-soft)}
+.nav-links a.active{color:var(--red)}
+.nav-links a:hover{color:var(--coral)}
+
+.crumb{max-width:var(--maxw);margin:0 auto;padding:20px 28px 0;font-family:var(--sans);font-size:13.5px;color:var(--ink-faint);display:flex;gap:9px;align-items:center}
+.crumb .sep{color:var(--line)}
+.crumb a{color:var(--ink-faint)}
+.crumb .here{color:var(--accent);font-weight:500}
+
+main{max-width:var(--maxw);margin:0 auto;padding:0 28px 100px}
+
+/* suit switcher */
+.suittabs{display:flex;gap:10px;margin:22px 0 8px;font-family:var(--sans);flex-wrap:wrap}
+.suittab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper-2);border-radius:30px;padding:8px 17px;cursor:pointer;font-size:15px;font-weight:500;color:var(--ink-soft);transition:all .22s}
+.suittab .s{font-size:18px;line-height:1}.suittab .s.r{color:var(--red)}.suittab .s.k{color:var(--ink)}
+.suittab:hover{border-color:var(--coral);color:var(--ink)}
+.suittab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.suittab.on .s{color:#fff}
+
+/* hero */
+.hero{display:grid;grid-template-columns:300px 1fr;gap:50px;align-items:center;padding:26px 0 24px}
+.glyphbox{display:flex;align-items:center;justify-content:center;position:relative}
+.glyphbox .ring{position:absolute;width:280px;height:280px;border:1.5px solid var(--gold);border-radius:50%;opacity:.4;filter:url(#rough)}
+.glyphbox .ring.r2{width:240px;height:240px;opacity:.25}
+.glyphbox .big{font-size:200px;line-height:1;color:var(--accent);filter:url(#rough) drop-shadow(0 8px 14px rgba(43,39,34,.2));transition:color .5s,filter .5s}
+body.shadow .glyphbox .big{filter:url(#rough) saturate(.55) brightness(.8);opacity:.85}
+.hero-meta .kicker{font-family:var(--sans);font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:10px}
+.hero-meta h1{font-family:var(--serif);font-weight:900;font-size:66px;line-height:1.02;margin:0 0 4px;display:flex;align-items:baseline;gap:18px}
+.hero-meta h1 .sg{color:var(--accent);font-size:50px}
+.hero-meta .latin{font-family:var(--sans);font-size:15px;color:var(--ink-faint);letter-spacing:.05em;margin-bottom:18px}
+.tagrow{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+.tag{font-family:var(--sans);font-size:13px;font-weight:500;padding:5px 13px;border-radius:30px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);white-space:nowrap}
+.tag.hl{border-color:var(--accent);color:var(--accent);background:#fff}
+.hero-meta .lede{font-size:19px;color:var(--ink-soft);max-width:32em;margin:0}
+.hero-meta .lede .dc{float:left;font-family:var(--serif);font-weight:900;color:var(--gold);font-size:64px;line-height:.76;padding:6px 12px 0 0}
+
+/* divider */
+.divider{display:flex;align-items:center;gap:18px;margin:40px 0 34px;color:var(--gold)}
+.divider svg{flex:1;height:12px;opacity:.78}
+.divider .flor{font-size:16px;letter-spacing:.3em}
+
+.sec-h{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 18px;display:flex;align-items:center;gap:11px}
+.sec-h::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.article{position:relative;padding-right:286px;max-width:1010px;margin:0 auto}
+.aside{float:right;clear:right;width:240px;margin-right:-286px;margin-bottom:24px;font-family:var(--sans)}
+.aside .pin{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--coral);font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.aside .pin::before{content:"❧";font-family:var(--serif);font-size:15px}
+.aside .body{font-size:13.5px;line-height:1.65;color:var(--ink-soft);border-left:2px solid var(--gold);padding:2px 0 2px 15px;font-style:italic}
+.aside .body em{color:var(--red);font-style:italic;font-weight:500}
+
+/* attribute panels + toggle */
+.attrwrap{position:relative}
+.toggle-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;font-family:var(--sans)}
+.toggle-row .tl{font-family:var(--serif);font-size:18px;font-weight:700;transition:color .35s,opacity .35s}
+.toggle-row .tl.l{color:var(--coral)}.toggle-row .tl.r{color:var(--ink-faint);opacity:.6}
+body.shadow .toggle-row .tl.l{color:var(--ink-faint);opacity:.6}
+body.shadow .toggle-row .tl.r{color:var(--red);opacity:1}
+.toggle{width:74px;height:38px;border-radius:30px;border:1.5px solid var(--gold);background:var(--paper);cursor:pointer;position:relative;flex:none;padding:0;transition:background .35s}
+.toggle .knob{position:absolute;top:3px;left:3px;width:30px;height:30px;border-radius:50%;background:var(--coral);box-shadow:0 2px 6px rgba(43,39,34,.3);transition:transform .4s cubic-bezier(.34,1.4,.5,1),background .35s}
+body.shadow .toggle .knob{transform:translateX(36px);background:var(--red)}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.panel{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:24px 26px;position:relative;transition:opacity .4s,filter .4s}
+.panel::after{content:"";position:absolute;inset:6px;border-radius:8px;pointer-events:none;border:1px solid var(--gold);opacity:.16;filter:url(#rough)}
+.panel .rl{font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px;display:inline-block}
+.panel.pos .rl{color:var(--coral)}
+.panel.neg .rl{color:var(--ink-faint)}
+.panel h3{font-family:var(--serif);font-weight:700;font-size:21px;margin:0 0 10px}
+.panel p{margin:0;font-size:16.5px;color:var(--ink-soft);line-height:1.72}
+.panel.pos p{color:var(--ink)}
+body:not(.shadow) .panel.neg{opacity:.5}
+body.shadow .panel.pos{opacity:.5}
+body.shadow .panel.neg .rl{color:var(--red)}
+
+/* quadrant map */
+.qmap{display:grid;grid-template-columns:120px 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:0;max-width:680px;margin:0 auto;font-family:var(--sans)}
+.qmap .corner{}
+.qmap .colh{text-align:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;padding:0 0 12px}
+.qmap .rowh{display:flex;align-items:center;justify-content:flex-end;padding-right:16px;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;text-align:right}
+.qcell{border:1px solid var(--line);margin:-0.5px 0 0 -0.5px;padding:20px;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;background:var(--paper-2);transition:all .3s;cursor:pointer}
+.qcell .qs{font-size:34px;line-height:1}.qcell .qs.r{color:var(--red)}.qcell .qs.k{color:var(--ink)}
+.qcell .qn{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink)}
+.qcell .qd{font-size:11.5px;color:var(--ink-faint)}
+.qcell:hover{background:var(--paper-3)}
+.qcell.active{background:#fff;border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.qcell.active .qn{color:var(--accent)}
+
+/* 13-card strip */
+.strip{display:grid;grid-template-columns:repeat(13,1fr);gap:9px}
+.strip a{display:block;border-radius:6px;overflow:hidden;transition:transform .2s,box-shadow .2s;background:#fff;box-shadow:0 3px 8px -5px rgba(43,39,34,.45)}
+.strip a img{width:100%;display:block;aspect-ratio:238/333}
+.strip a:hover{transform:translateY(-5px);box-shadow:0 12px 20px -10px rgba(43,39,34,.5)}
+.striplbl{font-family:var(--sans);font-size:12.5px;color:var(--ink-faint);text-align:center;margin-top:12px}
+
+/* combos */
+.combos{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.combo{border:1px solid var(--line);border-radius:12px;background:var(--paper-2);padding:20px 22px;transition:border-color .22s,transform .22s,box-shadow .22s}
+.combo:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:0 12px 24px -16px rgba(43,39,34,.4)}
+.combo .keys{display:flex;align-items:center;gap:7px;margin-bottom:10px;font-family:var(--sans)}
+.combo .keys .s{font-size:21px;line-height:1}.combo .keys .s.r{color:var(--red)}.combo .keys .s.k{color:var(--ink)}
+.combo .keys .plus{color:var(--gold);font-size:14px}
+.combo .keys .name{font-weight:700;font-size:14px;margin-left:5px;color:var(--ink);white-space:nowrap}
+.combo p{margin:0;font-size:15.5px;color:var(--ink-soft);line-height:1.66}
+.combo .more{display:inline-block;margin-top:10px;font-family:var(--sans);font-size:12.5px;color:var(--gold);font-weight:500}
+.combo.warn{background:#f8ece9;border-color:#d9a59c}
+.combo.warn .keys .name{color:var(--red)}
+
+.suitnav{display:flex;justify-content:space-between;gap:16px;max-width:1010px;margin:44px auto 0;font-family:var(--sans)}
+.suitnav button{flex:1;border:1px solid var(--line);border-radius:11px;padding:15px 20px;background:var(--paper-2);display:flex;flex-direction:column;gap:3px;transition:border-color .22s,background .22s;cursor:pointer;text-align:left;font-family:inherit}
+.suitnav button:hover{border-color:var(--coral);background:var(--paper)}
+.suitnav button.next{text-align:right;align-items:flex-end}
+.suitnav .dir{font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint)}
+.suitnav .ct{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.suitnav .ct .s.r{color:var(--red)}.suitnav .ct .s.k{color:var(--ink)}
+
+footer{border-top:1px solid var(--line);margin-top:70px;font-family:var(--sans);font-size:13px;color:var(--ink-faint)}
+.foot-inner{max-width:var(--maxw);margin:0 auto;padding:30px 28px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.foot-inner a{color:var(--ink-faint)}.foot-inner a:hover{color:var(--coral)}
+
+@media (max-width:980px){
+  .article{padding-right:0;max-width:none}
+  .aside{float:none;width:auto;margin:18px 0 24px;background:#fbf2e6;border:1px solid var(--line);border-radius:10px;padding:15px 17px}
+  .aside .body{border-left-width:3px}
+  .strip{grid-template-columns:repeat(7,1fr)}
+}
+@media (max-width:760px){
+  body{font-size:17px}
+  .nav-links{display:none}
+  .hero{grid-template-columns:1fr;gap:24px;padding:18px 0 6px}
+  .glyphbox{order:-1}
+  .glyphbox .big{font-size:140px}
+  .glyphbox .ring{width:200px;height:200px}.glyphbox .ring.r2{width:170px;height:170px}
+  .hero-meta{text-align:center}
+  .hero-meta h1{font-size:46px;justify-content:center}
+  .hero-meta .tagrow{justify-content:center}
+  .hero-meta .lede{margin:0 auto}
+  .panels{grid-template-columns:1fr;gap:16px}
+  .combos{grid-template-columns:1fr}
+  .qmap{grid-template-columns:64px 1fr 1fr}
+  .qcell{padding:12px;min-height:92px}.qcell .qs{font-size:26px}
+  .qmap .rowh{font-size:11px;padding-right:9px}
+  .strip{grid-template-columns:repeat(5,1fr)}
+  main{padding:0 18px 70px}.crumb{padding:16px 18px 0}.nav-inner{padding:12px 18px}
+  .suitnav{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="3" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+
+<div class="wrap">
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="mark"><span>♥</span><span class="k">♠</span></span><span>落差扑克牌占卜</span></div>
+    <nav class="nav-links">
+      <a href="教程页.html">教程</a>
+      <a href="牌库索引页.html">牌库</a>
+      <a href="#" class="active">四花色</a>
+      <a href="组合浏览器.html">组合浏览器</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="crumb"><a href="牌库索引页.html">牌库</a><span class="sep">›</span><span class="here" id="crumbHere">红桃</span></nav>
+
+<main>
+  <div class="suittabs" id="suittabs"></div>
+
+  <section class="hero">
+    <div class="glyphbox">
+      <span class="ring"></span><span class="ring r2"></span>
+      <span class="big" id="heroGlyph">♥</span>
+    </div>
+    <div class="hero-meta">
+      <div class="kicker" id="heroKicker">花色 · 心之动</div>
+      <h1 id="heroTitle">红桃 <span class="sg">♥</span></h1>
+      <div class="latin" id="heroLatin">Hearts — 阳 · 心之动</div>
+      <div class="tagrow" id="heroTags"></div>
+      <p class="lede" id="heroLede"></p>
+    </div>
+  </section>
+
+  <div class="divider">
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    <span class="flor">❦</span>
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- attributes -->
+  <div class="article">
+    <aside class="aside">
+      <div class="pin">叠加态</div>
+      <div class="body">花色没有"好坏"。拨动开关,<em>同一性格</em>会在正向与阴影之间翻面——这正是落差体系读牌的方式。</div>
+    </aside>
+    <h2 class="sec-h">花色性格 · 正向 × 阴影</h2>
+    <div class="attrwrap">
+      <div class="toggle-row">
+        <span class="tl l">正向 · 显义</span>
+        <button class="toggle" id="tog" aria-label="切换正向 / 阴影"><span class="knob"></span></button>
+        <span class="tl r">阴影 · 隐义</span>
+      </div>
+      <div class="panels">
+        <div class="panel pos"><span class="rl">正向 · 显义</span><h3 id="posH">主动而温热</h3><p id="posP"></p></div>
+        <div class="panel neg"><span class="rl">阴影 · 隐义</span><h3 id="negH">过则成伤</h3><p id="negP"></p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    <span class="flor">❦</span>
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- quadrant map -->
+  <div class="article">
+    <aside class="aside">
+      <div class="pin">注意阴阳颠倒</div>
+      <div class="body">颜色 ≠ 阴阳。方块虽<em>红</em>却属阴,梅花虽<em>黑</em>却属阳。四色按"心之动 / 客观存在"与"阴 / 阳"两轴分布。</div>
+    </aside>
+    <h2 class="sec-h">在体系里的位置</h2>
+    <div class="qmap">
+      <div class="corner"></div>
+      <div class="colh">心之动 · 有偏向</div>
+      <div class="colh">客观存在 · 无偏向</div>
+      <div class="rowh">阳</div>
+      <div class="qcell" data-suit="hearts"><span class="qs r">♥</span><span class="qn">红桃</span><span class="qd">阳 · 心之动</span></div>
+      <div class="qcell" data-suit="clubs"><span class="qs k">♣</span><span class="qn">梅花</span><span class="qd">阳 · 客观存在</span></div>
+      <div class="rowh">阴</div>
+      <div class="qcell" data-suit="spades"><span class="qs k">♠</span><span class="qn">黑桃</span><span class="qd">阴 · 心之动</span></div>
+      <div class="qcell" data-suit="diamonds"><span class="qs r">♦</span><span class="qn">方块</span><span class="qd">阴 · 客观存在</span></div>
+    </div>
+  </div>
+
+  <div class="divider">
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    <span class="flor">A — K</span>
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- 13 cards -->
+  <div class="article">
+    <h2 class="sec-h" id="stripH">红桃 · 十三层</h2>
+    <div class="strip" id="strip"></div>
+    <div class="striplbl">从 A 到 K,这一花色穿过十三层落差 · 点开任意一张读它的显义与隐义</div>
+  </div>
+
+  <div class="divider">
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 7 Q 60 1 120 6 T 240 6 T 400 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    <span class="flor">❦</span>
+    <svg viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q 160 1 280 6 T 400 7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- combos -->
+  <div class="article">
+    <h2 class="sec-h" id="comboH">含红桃的精选组合</h2>
+    <div class="combos" id="combos"></div>
+  </div>
+
+  <div class="suitnav">
+    <button class="prev" id="prevSuit"><span class="dir">← 上一花色</span><span class="ct" id="prevCt"></span></button>
+    <button class="next" id="nextSuit"><span class="dir">下一花色 →</span><span class="ct" id="nextCt"></span></button>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <span>落差扑克牌占卜 · 四花色</span>
+    <span><a href="教程页.html">教程</a> · <a href="牌库索引页.html">牌库索引</a> · <a href="组合浏览器.html">组合浏览器</a></span>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  var DATA={
+    hearts:{cn:'红桃',sym:'♥',cls:'r',latin:'Hearts',yy:'阳 · 心之动',group:'心之动',accent:'#A3372B',
+      tags:['♥ 红桃','阳','心之动','有偏向'],
+      lede:'心之所向的<strong>动</strong>。红桃是主动伸出的手——它关乎意志的方向,带着热度与创造的驱动力。',
+      posH:'主动而温热',pos:'积极、主动、勇敢、爱心、生命力、向上进取,带着创造的驱动力。',
+      negH:'过则成伤',neg:'也可代表缺乏积极、缺乏勇敢;或这份勇敢、热忱被他人利用。',
+      combos:[['hearts','clubs','红桃 + 梅花','积极行动、勇于创造,不断进取拓展;一种生机勃勃、无尽生发的状态,生命力充沛。'],
+              ['hearts','spades','红桃 + 黑桃','偏向的极致:可正可负,甚至 360 度任意偏向,并可随意极化到不同程度。']]},
+    spades:{cn:'黑桃',sym:'♠',cls:'k',latin:'Spades',yy:'阴 · 心之动',group:'心之动',accent:'#2B2722',
+      tags:['♠ 黑桃','阴','心之动','有偏向'],
+      lede:'心之所向的<strong>沉</strong>。黑桃向下扎根、向内承载——它与红桃同属心之动,却朝着相反的方向用力。',
+      posH:'承载而深沉',pos:'承载、沉淀、厚重、基底、潜能、深入挖掘、包容。',
+      negH:'沉则成滞',neg:'破坏、抽离、消亡;也可指视野狭隘、自大傲慢,或反向的扩张打破。',
+      combos:[['spades','clubs','黑桃 + 梅花','摧毁性质的状态:汲取、抽离、分割、破坏;另一面则是极致的承载与包容、深度挖掘。'],
+              ['hearts','spades','红桃 + 黑桃','偏向的极致:可正可负,甚至 360 度任意偏向,并可随意极化到不同程度。']]},
+    clubs:{cn:'梅花',sym:'♣',cls:'k',latin:'Clubs',yy:'阳(黑色)· 客观存在',group:'客观存在',accent:'#5b5246',
+      tags:['♣ 梅花','阳(黑)','客观存在','无偏向'],
+      lede:'已坍缩的<strong>有</strong>。梅花是显化为实的部分——具象、可见、可触,是行动与思想结成的果。',
+      posH:'显化成形',pos:'已坍缩 / 显化,具象、实体、可见——有形的行动、思想、成果与产品。',
+      negH:'形则成困',neg:'固化、被有形所困;或缺乏建树、尚未结果。',
+      combos:[['hearts','clubs','红桃 + 梅花','积极行动、勇于创造,不断进取拓展;一种生机勃勃、无尽生发的状态,生命力充沛。'],
+              ['spades','clubs','黑桃 + 梅花','摧毁性质的状态:汲取、抽离、分割、破坏;另一面则是极致的承载与包容、深度挖掘。']]},
+    diamonds:{cn:'方块',sym:'♦',cls:'r',latin:'Diamonds',yy:'阴(红色)· 客观存在',group:'客观存在',accent:'#A3372B',
+      tags:['♦ 方块','阴(红)','客观存在','无偏向'],
+      lede:'未显化的<strong>无</strong>。方块是尚未坍缩的概率场——规则、边界、形状与无尽的可能,等待被显化。',
+      posH:'潜在可塑',pos:'未显化 / 潜在,概率场、无尽可能;规则、边界、形状,可塑性强。',
+      negH:'潜而不发',neg:'未行动、未建树、未探索;或太固化、偏向太多。',
+      combos:[['warn3','','缺方块(只有 ♥♠♣)','整个世界乱套、无规则、卡死态——没有边界、大小、范围,所有东西混乱地堆叠卡在一起。']]}
+  };
+  var ORDER=['hearts','spades','diamonds','clubs'];
+  var SYM={hearts:'♥',spades:'♠',diamonds:'♦',clubs:'♣'};
+  var CLS={hearts:'r',spades:'k',diamonds:'r',clubs:'k'};
+
+  var cur='hearts';
+  var $=function(id){return document.getElementById(id);};
+
+  // build tabs
+  var tabs=$('suittabs');
+  ORDER.forEach(function(k){
+    var d=DATA[k];
+    var b=document.createElement('button');
+    b.className='suittab';b.setAttribute('data-suit',k);
+    b.innerHTML='<span class="s '+d.cls+'">'+d.sym+'</span>'+d.cn;
+    b.addEventListener('click',function(){go(k);});
+    tabs.appendChild(b);
+  });
+
+  function chip(html,hl){return '<span class="tag'+(hl?' hl':'')+'">'+html+'</span>';}
+
+  function comboCard(c){
+    if(c[0]==='warn3'){
+      return '<div class="combo warn"><div class="keys"><span class="s r">♥</span><span class="s k">♠</span><span class="s k">♣</span><span class="name">'+c[2]+'</span></div><p>'+c[3]+'</p></div>';
+    }
+    var a=c[0],b=c[1];
+    return '<div class="combo"><div class="keys"><span class="s '+CLS[a]+'">'+SYM[a]+'</span><span class="plus">+</span><span class="s '+CLS[b]+'">'+SYM[b]+'</span><span class="name">'+c[2]+'</span></div><p>'+c[3]+'</p><a class="more" href="组合浏览器.html">在组合浏览器中查看 →</a></div>';
+  }
+
+  function go(k){
+    cur=k;var d=DATA[k];
+    document.documentElement.style.setProperty('--accent',d.accent);
+    document.body.classList.remove('shadow');
+    $('tog').setAttribute('aria-pressed','false');
+    // tabs
+    Array.prototype.forEach.call(tabs.children,function(b){b.classList.toggle('on',b.getAttribute('data-suit')===k);});
+    // hero
+    $('crumbHere').textContent=d.cn;
+    $('heroGlyph').textContent=d.sym;
+    $('heroKicker').textContent='花色 · '+d.group;
+    $('heroTitle').innerHTML=d.cn+' <span class="sg">'+d.sym+'</span>';
+    $('heroLatin').textContent=d.latin+' — '+d.yy;
+    $('heroTags').innerHTML=d.tags.map(function(t,i){return chip(t,i===0);}).join('');
+    $('heroLede').innerHTML='<span class="dc">'+d.cn.charAt(0)+'</span>'+d.lede;
+    // panels
+    $('posH').textContent=d.posH;$('posP').textContent=d.pos;
+    $('negH').textContent=d.negH;$('negP').textContent=d.neg;
+    // quadrant active
+    document.querySelectorAll('.qcell').forEach(function(c){c.classList.toggle('active',c.getAttribute('data-suit')===k);});
+    // strip
+    $('stripH').textContent=d.cn+' · 十三层';
+    $('strip').innerHTML=RANKS.map(function(r){
+      return '<a href="单卡页模板.html?c='+k+'_'+r+'" title="'+d.cn+r+'"><img loading="lazy" src="cards_svg/'+k+'_'+r+'.svg" alt="'+d.cn+r+'"></a>';
+    }).join('');
+    // combos
+    $('comboH').textContent='含'+d.cn+'的精选组合';
+    $('combos').innerHTML=d.combos.map(comboCard).join('');
+    // prev/next
+    var idx=ORDER.indexOf(k);
+    var pv=DATA[ORDER[(idx-1+ORDER.length)%ORDER.length]],nx=DATA[ORDER[(idx+1)%ORDER.length]];
+    $('prevCt').innerHTML='<span class="s '+pv.cls+'">'+pv.sym+'</span>'+pv.cn;
+    $('nextCt').innerHTML='<span class="s '+nx.cls+'">'+nx.sym+'</span>'+nx.cn;
+    try{localStorage.setItem('suit-cur',k);}catch(e){}
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+
+  // events
+  $('tog').addEventListener('click',function(){
+    var s=document.body.classList.toggle('shadow');
+    this.setAttribute('aria-pressed',s?'true':'false');
+  });
+  document.querySelectorAll('.qcell').forEach(function(c){
+    c.addEventListener('click',function(){go(c.getAttribute('data-suit'));});
+  });
+  $('prevSuit').addEventListener('click',function(){var i=ORDER.indexOf(cur);go(ORDER[(i-1+ORDER.length)%ORDER.length]);});
+  $('nextSuit').addEventListener('click',function(){var i=ORDER.indexOf(cur);go(ORDER[(i+1)%ORDER.length]);});
+
+  var saved='hearts';
+  try{saved=localStorage.getItem('suit-cur')||'hearts';}catch(e){}
+  if(!DATA[saved])saved='hearts';
+  go(saved);
+})();
+</script>
+</body>
+</html>
